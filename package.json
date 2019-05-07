@@ -1,0 +1,12 @@
+{
+  "name": "gpx-utils",
+  "version": "1.0.0",
+  "description": "A set of utilities for processing GPX files",
+  "main": "index.js",
+  "author": "Kyle Karpack <kylekarpack@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "start": "tsc -w index.ts"
+  }
+}
