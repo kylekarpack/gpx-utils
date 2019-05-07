@@ -8,5 +8,8 @@
   "private": false,
   "scripts": {
     "start": "tsc -w index.ts"
+  },
+  "dependencies": {
+    "@turf/turf": "^5.1.6"
   }
 }
