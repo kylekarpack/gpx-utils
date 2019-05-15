@@ -7,8 +7,14 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "Launch Program",
-			"program": "${workspaceFolder}\\test.js",
-		}
+			"name": "Debug TypeScript in Node.js",
+			"preLaunchTask": "typescript",
+			"program": "${workspaceFolder}/test.js",
+			"cwd": "${workspaceFolder}",
+			"protocol": "inspector",
+			"outFiles": [
+			  "${workspaceFolder}/dist/**/*.js"
+			]
+		  }
 	]
 }

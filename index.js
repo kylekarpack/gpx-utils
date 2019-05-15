@@ -3,6 +3,7 @@ exports.__esModule = true;
 var toGeoJson = require("@mapbox/togeojson");
 var length_1 = require("@turf/length");
 var xmldom_1 = require("xmldom");
+var fs = require("fs");
 var GpxUtils = /** @class */ (function () {
     function GpxUtils(gpxFile) {
         this.gpxFile = gpxFile;
@@ -25,6 +26,9 @@ var GpxUtils = /** @class */ (function () {
     GpxUtils.fromFile = function (fileData) {
         var parsedFile = this.parseFile(fileData);
         return new GpxUtils(parsedFile);
+    };
+    GpxUtils.fromFilePath = function (filePath) {
+        return this.fromFile(fs.readFileSync(filePath).toString());
     };
     GpxUtils.parseFile = function (fileData) {
         return new xmldom_1.DOMParser().parseFromString(fileData, "text/xml");

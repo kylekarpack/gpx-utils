@@ -4,6 +4,7 @@ import length from "@turf/length";
 import { GpxFile } from "./interfaces/gpx-file";
 import { Trkpt } from "./interfaces/trkpt";
 import { DOMParser } from "xmldom";
+import * as fs from "fs";
 
 import { TIME_SELECTOR, TRACK_NAME_SELECTOR, TRACK_POINTS_SELECTOR } from "./constants/selectors";
 
@@ -23,6 +24,10 @@ export class GpxUtils {
 	public static fromFile(fileData: string): GpxUtils {
 		const parsedFile = this.parseFile(fileData);
 		return new GpxUtils(parsedFile);
+	}
+
+	public static fromFilePath(filePath: string): GpxUtils {
+		return this.fromFile(fs.readFileSync(filePath).toString());
 	}
 
 	public static parseFile(fileData: string): GpxFile {
