@@ -3,7 +3,7 @@ export class GpxWaypoint {
 	lat: number	// The latitude of the waypoint.
 	lon: number	// The longtitude of the waypoint.
 	elevation: number	// of the waypoint.
-	time: string	// The time at the waypoint.
+	time: Date	// The time at the waypoint.
 	magvar: number	// The magnetic variation at the waypoint.
 	geoidheight: number	// The geoid height at the waypoint.
 	name: string	// The name of the waypoint.

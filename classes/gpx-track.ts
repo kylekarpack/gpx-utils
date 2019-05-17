@@ -1,4 +1,6 @@
+import { GpxWaypoint } from './gpx-waypoint';
+
 export class GpxTrack {
-	segments: object[];
+	segments: GpxWaypoint[][];
 	name: string;
 }
