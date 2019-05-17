@@ -1,10 +1,10 @@
-import * as toGeoJson from "@mapbox/togeojson";
-import { Units } from "@turf/helpers";
+import { Units, AllGeoJSON } from "@turf/helpers";
 import length from "@turf/length";
-import { GpxFile } from "./classes/gpx-file";
-import * as gpxParse from "gpx-parse";
+import { GpxWaypoint } from "classes/gpx-waypoint";
 import * as fs from "fs";
-import { GpxWaypoint } from 'classes/gpx-waypoint';
+import * as gpxParse from "gpx-parse";
+import { GeoJson } from "./classes/geo-json";
+import { GpxFile } from "./classes/gpx-file";
 
 export class GpxUtils {
 
@@ -12,11 +12,11 @@ export class GpxUtils {
 		return this.gpxFile.tracks[0].segments[0];
 	}
 
-	get geoJson() {
-		return toGeoJson(this.gpxFile.tracks[0].segments[0]);
-	}
+	public geoJson: AllGeoJSON;
 
-	constructor(public gpxFile: GpxFile) { }
+	constructor(public gpxFile: GpxFile) { 
+		this.geoJson = new GeoJson(gpxFile).geoJson;
+	}
 
 	public static async fromFile(fileData: string): Promise<GpxUtils> {
 		const parsedFile = await this.parseFile(fileData);
@@ -38,7 +38,6 @@ export class GpxUtils {
 		});
 	}
 
-
 	public getTotalTime(): number {
 		return this.points[this.points.length - 1].time.getTime() - this.points[0].time.getTime();
 	}
@@ -53,7 +52,6 @@ export class GpxUtils {
 			prevPoint = point;
 		}
 		return time;
-
 	}
 
 	public getTotalDistance(options: { units: Units } = { units: "miles" }): number {

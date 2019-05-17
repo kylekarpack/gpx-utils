@@ -8,4 +8,5 @@ let file = fs.readFileSync("./beckler-peak.gpx").toString();
 	let gpx = await GpxUtils.fromFile(file);
 	console.log("total time", gpx.getTotalTime());
 	console.log("moving time", gpx.getMovingTime());
+	console.log("distance", gpx.getTotalDistance());
 })();
