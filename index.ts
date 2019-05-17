@@ -1,5 +1,6 @@
 import { Units, AllGeoJSON } from "@turf/helpers";
 import length from "@turf/length";
+import center from "@turf/center";
 import { GpxWaypoint } from "classes/gpx-waypoint";
 import * as fs from "fs";
 import * as gpxParse from "gpx-parse";
@@ -10,6 +11,10 @@ export class GpxUtils {
 
 	get points(): GpxWaypoint[] {
 		return this.gpxFile.tracks[0].segments[0];
+	}
+
+	get name(): string {
+		return this.gpxFile.tracks[0].name;
 	}
 
 	public geoJson: AllGeoJSON;
@@ -54,8 +59,33 @@ export class GpxUtils {
 		return time;
 	}
 
+	public getTotalElevation(): number {
+		return this.points.reduce((total, currentItem, index) => {
+			const nextItem = this.points[index + 1];
+			if (nextItem && nextItem.elevation > currentItem.elevation) {
+				return total + (nextItem.elevation - currentItem.elevation);
+			}
+			return total;
+		}, 0);
+	}
+
+	public getNetTotalElevation(): number {
+		
+		return this.points.reduce((total, currentItem, index) => {
+			const nextItem = this.points[index + 1];
+			if (nextItem && nextItem.elevation > currentItem.elevation) {
+				return total + (nextItem.elevation - currentItem.elevation);
+			}
+			return total;
+		}, 0);
+	}
+
 	public getTotalDistance(options: { units: Units } = { units: "miles" }): number {
 		return length(this.geoJson, options);
+	}
+
+	public getCenter(): number[] {
+		return center(this.geoJson).geometry.coordinates;
 	}
 
 }
