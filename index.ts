@@ -106,7 +106,6 @@ export class GpxUtils {
 		return center(this.geoJson).geometry.coordinates;
 	}
 
-	@memoize() 
 	private getMetricOverMatchingPoints<T>(
 		compareFn: (a: GpxWaypoint, b: GpxWaypoint) => boolean,
 		metricFn: (a: GpxWaypoint, b: GpxWaypoint) => any
@@ -124,8 +123,12 @@ export class GpxUtils {
 		return metric as any;
 	}
 
-	private distanceMetric = (a: GpxWaypoint, b: GpxWaypoint) => {
+	private distanceMetric = (a: GpxWaypoint, b: GpxWaypoint): number => {
 		return distance(this.waypointToPoint(a), this.waypointToPoint(b), { units: "miles" });
+	}
+
+	private timeMetric = (a: GpxWaypoint, b: GpxWaypoint): number => {
+		return b.time.getTime() - a.time.getTime()
 	}
 
 	@memoize()
@@ -144,6 +147,39 @@ export class GpxUtils {
 	 public getFlatDistance(): number {
 		 const matchingFunction = (a: GpxWaypoint, b: GpxWaypoint) => a.elevation === b.elevation;
 		 return this.getMetricOverMatchingPoints<number>(matchingFunction, this.distanceMetric);
+	}
+
+	@memoize()
+	public getClimbingTime(): number {
+		const matchingFunction = (a: GpxWaypoint, b: GpxWaypoint) => a.elevation < b.elevation;
+		return this.getMetricOverMatchingPoints<number>(matchingFunction, this.timeMetric);
+	}
+
+	@memoize()
+	public getDescentTime(): number {
+		const matchingFunction = (a: GpxWaypoint, b: GpxWaypoint) => a.elevation > b.elevation;
+		return this.getMetricOverMatchingPoints<number>(matchingFunction, this.timeMetric);
+	}
+
+	@memoize()
+	public getFlatTime(): number {
+		const matchingFunction = (a: GpxWaypoint, b: GpxWaypoint) => a.elevation === b.elevation;
+		return this.getMetricOverMatchingPoints<number>(matchingFunction, this.timeMetric);
+	}
+
+	@memoize()
+	public getClimbingSpeed(): number {
+		return this.getClimbingDistance() / (this.getClimbingTime() / 1000 / 60 / 60);
+	}
+
+	@memoize()
+	public getDescentSpeed(): number {
+		return this.getDescentDistance() / (this.getDescentTime() / 1000 / 60 / 60);
+	}
+
+	@memoize()
+	public getFlatSpeed(): number {
+		return this.getFlatDistance() / (this.getFlatTime() / 1000 / 60 / 60);
 	}
 
 }
