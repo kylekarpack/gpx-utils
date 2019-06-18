@@ -12,5 +12,8 @@ let file = fs.readFileSync("./beckler-peak.gpx").toString();
 	console.log("distance", gpx.getTotalDistance());
 	console.log("center", gpx.getCenter());
 	console.log("elevation", gpx.getTotalElevation());
+	console.log("climbing distance", gpx.getClimbingDistance());
+	console.log("descent distance", gpx.getDescentDistance());
+	console.log("flat distance", gpx.getFlatDistance());
 
 })();

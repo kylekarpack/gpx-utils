@@ -1,12 +1,13 @@
-import { Units, AllGeoJSON } from "@turf/helpers";
-import length from "@turf/length";
 import center from "@turf/center";
+import { AllGeoJSON, Units, point, Point } from "@turf/helpers";
+import length from "@turf/length";
+import distance from "@turf/distance";
 import { GpxWaypoint } from "classes/gpx-waypoint";
+import { memoize } from "decko";
 import * as fs from "fs";
 import * as gpxParse from "gpx-parse";
 import { GeoJson } from "./classes/geo-json";
 import { GpxFile } from "./classes/gpx-file";
-import { memoize } from "decko";
 
 export class GpxUtils {
 
@@ -20,7 +21,7 @@ export class GpxUtils {
 
 	public geoJson: AllGeoJSON;
 
-	constructor(public gpxFile: GpxFile) { 
+	constructor(public gpxFile: GpxFile) {
 		this.geoJson = new GeoJson(gpxFile).geoJson;
 	}
 
@@ -41,6 +42,16 @@ export class GpxUtils {
 				}
 				resolve(data);
 			});
+		});
+	}
+
+	private waypointToPoint(waypoint: GpxWaypoint): any {
+		return point([waypoint.lon, waypoint.lat]);
+	}
+
+	private getClimbingParts(): GpxWaypoint[] {
+		return this.points.filter((waypoint, i) => {
+			return this.points[i] && this.points[i + 1] && this.points[i].elevation < this.points[i + 1].elevation;
 		});
 	}
 
@@ -75,7 +86,7 @@ export class GpxUtils {
 
 	@memoize()
 	public getNetTotalElevation(): number {
-		
+
 		return this.points.reduce((total, currentItem, index) => {
 			const nextItem = this.points[index + 1];
 			if (nextItem && nextItem.elevation > currentItem.elevation) {
@@ -93,6 +104,46 @@ export class GpxUtils {
 	@memoize()
 	public getCenter(): number[] {
 		return center(this.geoJson).geometry.coordinates;
+	}
+
+	@memoize() 
+	private getMetricOverMatchingPoints<T>(
+		compareFn: (a: GpxWaypoint, b: GpxWaypoint) => boolean,
+		metricFn: (a: GpxWaypoint, b: GpxWaypoint) => any
+	): T {
+		let metric = 0;
+
+		for (let i = 0; i < this.points.length; i++) {
+			if (this.points[i] && this.points[i + 1]) {
+				if (compareFn(this.points[i], this.points[i + 1])) {
+					metric += metricFn(this.points[i], this.points[i + 1]);
+				}
+			}			
+		}
+
+		return metric as any;
+	}
+
+	private distanceMetric = (a: GpxWaypoint, b: GpxWaypoint) => {
+		return distance(this.waypointToPoint(a), this.waypointToPoint(b), { units: "miles" });
+	}
+
+	@memoize()
+	public getClimbingDistance(): number {
+		const matchingFunction = (a: GpxWaypoint, b: GpxWaypoint) => a.elevation < b.elevation;
+		return this.getMetricOverMatchingPoints<number>(matchingFunction, this.distanceMetric);
+	}
+	 
+	@memoize()
+	public getDescentDistance(): number {
+		const matchingFunction = (a: GpxWaypoint, b: GpxWaypoint) => a.elevation > b.elevation;
+		return this.getMetricOverMatchingPoints<number>(matchingFunction, this.distanceMetric);
+ 	}
+
+	 @memoize()
+	 public getFlatDistance(): number {
+		 const matchingFunction = (a: GpxWaypoint, b: GpxWaypoint) => a.elevation === b.elevation;
+		 return this.getMetricOverMatchingPoints<number>(matchingFunction, this.distanceMetric);
 	}
 
 }
