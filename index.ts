@@ -6,6 +6,7 @@ import * as fs from "fs";
 import * as gpxParse from "gpx-parse";
 import { GeoJson } from "./classes/geo-json";
 import { GpxFile } from "./classes/gpx-file";
+import { memoize } from "decko";
 
 export class GpxUtils {
 
@@ -43,10 +44,12 @@ export class GpxUtils {
 		});
 	}
 
+	@memoize()
 	public getTotalTime(): number {
 		return this.points[this.points.length - 1].time.getTime() - this.points[0].time.getTime();
 	}
 
+	@memoize()
 	public getMovingTime(): number {
 		let time: number = 0,
 			prevPoint: GpxWaypoint = this.points[0];
@@ -59,6 +62,7 @@ export class GpxUtils {
 		return time;
 	}
 
+	@memoize()
 	public getTotalElevation(): number {
 		return this.points.reduce((total, currentItem, index) => {
 			const nextItem = this.points[index + 1];
@@ -69,6 +73,7 @@ export class GpxUtils {
 		}, 0);
 	}
 
+	@memoize()
 	public getNetTotalElevation(): number {
 		
 		return this.points.reduce((total, currentItem, index) => {
@@ -80,10 +85,12 @@ export class GpxUtils {
 		}, 0);
 	}
 
+	@memoize()
 	public getTotalDistance(options: { units: Units } = { units: "miles" }): number {
 		return length(this.geoJson, options);
 	}
 
+	@memoize()
 	public getCenter(): number[] {
 		return center(this.geoJson).geometry.coordinates;
 	}
